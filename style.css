@@ -16,7 +16,7 @@
   height: 40px;
 }
 
-.grid-computer {
+.grid-ai {
   width: 400px;
   height: 400px;
   display: flex;
@@ -32,7 +32,7 @@
   margin: 20px;
 }
 
-.destroyer {
+.destroyer-container {
   width: 80px;
   height: 40px;
   background-color: darkblue;
@@ -40,7 +40,7 @@
   display: flex;
 }
 
-.submarine {
+.submarine-container {
   width: 120px;
   height: 40px;
   background-color: darkcyan;
@@ -48,7 +48,7 @@
   display: flex;
 }
 
-.cruiser {
+.cruiser-container {
   width: 120px;
   height: 40px;
   background-color: chartreuse;
@@ -56,7 +56,7 @@
   display: flex;
 }
 
-.battleship {
+.battleship-container {
   width: 160px;
   height: 40px;
   background-color: darkorange;
@@ -64,7 +64,7 @@
   display: flex;
 }
 
-.carrier {
+.carrier-container {
   width: 200px;
   height: 40px;
   background-color: darkred;
@@ -75,4 +75,24 @@
 .ship div {
   width: 40px;
   height: 40px;
+}
+
+.destroyer {
+  background-color: darkblue;
+}
+
+.submarine {
+  background-color: darkcyan;
+}
+
+.cruiser {
+  background-color: chartreuse;
+}
+
+.battleship {
+  background-color: darkorange;
+}
+
+.carrier {
+  background-color: darkred;
 }
