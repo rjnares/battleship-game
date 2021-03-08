@@ -3,11 +3,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const aiGrid = document.querySelector(".grid-ai");
   const chooseShipsGrid = document.querySelector(".grid-choose-ships");
   const ships = document.querySelectorAll(".ship");
-  const carrier = document.querySelector(".carrier");
-  const battleship = document.querySelector(".battleship");
-  const cruiser = document.querySelector(".cruiser");
-  const submarine = document.querySelector(".submarine");
-  const destroyer = document.querySelector(".destroyer");
+  const carrier = document.querySelector(".carrier-container");
+  const battleship = document.querySelector(".battleship-container");
+  const cruiser = document.querySelector(".cruiser-container");
+  const submarine = document.querySelector(".submarine-container");
+  const destroyer = document.querySelector(".destroyer-container");
   const startGameButton = document.querySelector("#start-game");
   const rotateShipsButton = document.querySelector("#rotate-ships");
   const currentTurnDisplay = document.querySelector("#current-turn");
@@ -117,5 +117,17 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
+  // Generate random placement for each ship
   shipArray.forEach((ship) => generateRandomAiShipLayout(ship));
+
+  // Rotate ships by toggling (adding/removing) a vertical css style of ships
+  function rotateShips() {
+    carrier.classList.toggle("carrier-container-vertical");
+    battleship.classList.toggle("battleship-container-vertical");
+    cruiser.classList.toggle("cruiser-container-vertical");
+    submarine.classList.toggle("submarine-container-vertical");
+    destroyer.classList.toggle("destroyer-container-vertical");
+  }
+
+  rotateShipsButton.addEventListener("click", rotateShips);
 });
