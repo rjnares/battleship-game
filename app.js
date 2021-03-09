@@ -188,12 +188,30 @@ document.addEventListener("DOMContentLoaded", () => {
     // console.log("drag leave");
   }
 
+  function canPlace(dropCellId, selectedShipIndex) {
+    let pass = true;
+
+    if (orientation == HORIZONTAL) {
+      for (let i = 0; i < draggedShipLength; i++) {
+        const cellPlaceId = dropCellId - selectedShipIndex + i;
+        const filled = userSquares[cellPlaceId].classList.contains("filled");
+        if (filled) pass = false;
+      }
+    } else {
+      for (let i = 0; i < draggedShipLength; i++) {
+        const cellPlaceId = dropCellId - selectedShipIndex * width + i * width;
+        const filled = userSquares[cellPlaceId].classList.contains("filled");
+        if (filled) pass = false;
+      }
+    }
+    return pass;
+  }
+
   // Bug: can drop ships over each other. Need to check if none of spots are filled
   function drop() {
     const dropCellId = parseInt(this.dataset.id);
     const shipClass = selectedShipNameWithIndex.slice(0, -2);
     const selectedShipIndex = parseInt(selectedShipNameWithIndex.substr(-1));
-    const cellsToPlace = [];
 
     if (orientation == HORIZONTAL) {
       // HORIZONTAL
@@ -210,7 +228,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const high = dropCellId + (lastShipIndex - selectedShipIndex);
 
       // If min <= low < high <= max then allow placement, otherwise deny placement
-      if (minLimit <= low && low < high && high <= maxLimit) {
+      if (
+        minLimit <= low &&
+        low < high &&
+        high <= maxLimit &&
+        canPlace(dropCellId, selectedShipIndex)
+      ) {
         // Place ship
         for (let i = 0; i < draggedShipLength; i++) {
           const cellPlaceId = dropCellId - selectedShipIndex + i;
@@ -231,7 +254,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const high = dropCellId + (lastShipIndex - selectedShipIndex) * width;
 
       // If 0 <= low < high <= 99 then allow placement, otherwise deny placement
-      if (0 <= low && low < high && high <= 99) {
+      if (
+        0 <= low &&
+        low < high &&
+        high <= 99 &&
+        canPlace(dropCellId, selectedShipIndex)
+      ) {
         // Place ship
         for (let i = 0; i < draggedShipLength; i++) {
           const cellPlaceId =
