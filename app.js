@@ -207,7 +207,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return pass;
   }
 
-  // Bug: can drop ships over each other. Need to check if none of spots are filled
   function drop() {
     const dropCellId = parseInt(this.dataset.id);
     const shipClass = selectedShipNameWithIndex.slice(0, -2);
@@ -273,48 +272,158 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  const shipCount = {
-    carrier: 0,
-    battleship: 0,
-    cruiser: 0,
-    submarine: 0,
-    destroyer: 0,
+  const aiShipCount = {
+    carrier: 5,
+    battleship: 4,
+    cruiser: 3,
+    submarine: 3,
+    destroyer: 2,
   };
+
+  const userShipCount = {
+    carrier: 5,
+    battleship: 4,
+    cruiser: 3,
+    submarine: 3,
+    destroyer: 2,
+  };
+
+  function checkGameOver() {
+    // Check if all player ship counts are 0, if so, end game
+    if (
+      userShipCount.carrier +
+        userShipCount.battleship +
+        userShipCount.cruiser +
+        userShipCount.submarine +
+        userShipCount.destroyer ==
+      0
+    ) {
+      gameInfoDisplay.innerHTML = "ENEMY WINS!";
+      isGameOver = true;
+    }
+
+    // Check if all ai ship counts are 0, if so, end game
+    if (
+      aiShipCount.carrier +
+        aiShipCount.battleship +
+        aiShipCount.cruiser +
+        aiShipCount.submarine +
+        aiShipCount.destroyer ==
+      0
+    ) {
+      gameInfoDisplay.innerHTML = "PLAYER WINS!";
+      isGameOver = true;
+    }
+  }
 
   function revealSquare(square) {
     // Add number of hits for each ship type hit ONLY if not hit already
     if (!square.classList.contains("hit")) {
-      if (square.classList.contains("carrier")) shipCount.carrier++;
-      if (square.classList.contains("battleship")) shipCount.battleship++;
-      if (square.classList.contains("cruiser")) shipCount.cruiser++;
-      if (square.classList.contains("submarine")) shipCount.submarine++;
-      if (square.classList.contains("destroyer")) shipCount.destroyer++;
+      if (square.classList.contains("carrier")) {
+        aiShipCount.carrier--;
+        if (aiShipCount.carrier == 0)
+          gameInfoDisplay.innerHTML = "Player sunk the enemy Carrier!";
+      }
+      if (square.classList.contains("battleship")) {
+        aiShipCount.battleship--;
+        if (aiShipCount.battleship == 0)
+          gameInfoDisplay.innerHTML = "Player sunk the enemy Battleship!";
+      }
+      if (square.classList.contains("cruiser")) {
+        aiShipCount.cruiser--;
+        if (aiShipCount.cruiser == 0)
+          gameInfoDisplay.innerHTML = "Player sunk the enemy Cruiser!";
+      }
+      if (square.classList.contains("submarine")) {
+        aiShipCount.submarine--;
+        if (aiShipCount.submarine == 0)
+          gameInfoDisplay.innerHTML = "Player sunk the enemy Submarine!";
+      }
+      if (square.classList.contains("destroyer")) {
+        aiShipCount.destroyer--;
+        if (aiShipCount.destroyer == 0)
+          gameInfoDisplay.innerHTML = "Player sunk the enemy Destroyer!";
+      }
     }
 
     // Set hit cells
-    if (square.classList.contains("filled")) square.classList.add("hit");
-    else square.classList.add("miss");
+    if (square.classList.contains("filled")) {
+      square.classList.add("hit");
+      gameInfoDisplay.innerHTML = "Player scored a hit!";
+    } else {
+      square.classList.add("miss");
+      gameInfoDisplay.innerHTML = "Player missed!";
+    }
 
     isUserTurn = false;
-
-    console.log(shipCount);
+    checkGameOver();
     playGame();
   }
 
   function aiTurn() {
-    console.log("ENEMY TAKES TURN");
+    let randomUserCell = Math.floor(Math.random() * 100);
+    let square = userSquares[randomUserCell];
+
+    while (
+      square.classList.contains("hit") ||
+      square.classList.contains("miss")
+    ) {
+      randomUserCell = Math.floor(Math.random() * 100);
+      square = userSquares[randomUserCell];
+    }
+
+    // Add number of hits for each ship type hit ONLY if not hit already
+    if (square.classList.contains("carrier")) {
+      userShipCount.carrier--;
+      if (userShipCount.carrier == 0)
+        gameInfoDisplay.innerHTML = "Enemy sunk the player's Carrier!";
+    }
+    if (square.classList.contains("battleship")) {
+      userShipCount.battleship--;
+      if (userShipCount.battleship == 0)
+        gameInfoDisplay.innerHTML = "Enemy sunk the player's Battleship!";
+    }
+    if (square.classList.contains("cruiser")) {
+      userShipCount.cruiser--;
+      if (userShipCount.cruiser == 0)
+        gameInfoDisplay.innerHTML = "Enemy sunk the player's Cruiser!";
+    }
+    if (square.classList.contains("submarine")) {
+      userShipCount.submarine--;
+      if (userShipCount.submarine == 0)
+        gameInfoDisplay.innerHTML = "Enemy sunk the player's Submarine!";
+    }
+    if (square.classList.contains("destroyer")) {
+      userShipCount.destroyer--;
+      if (userShipCount.destroyer == 0)
+        gameInfoDisplay.innerHTML = "Enemy sunk the player's Destroyer!";
+    }
+
+    // Set hit cells
+    if (square.classList.contains("filled")) {
+      square.classList.add("hit");
+      gameInfoDisplay.innerHTML = "Enemy scored a hit!";
+    } else {
+      square.classList.add("miss");
+      gameInfoDisplay.innerHTML = "Enemy missed!";
+    }
+
     isUserTurn = true;
+    checkGameOver();
     playGame();
   }
 
   // Game logic
-  let isGameOver = false;
   let isUserTurn = true;
   let isGameInit = true;
+  let isGameOver = false;
 
   function playGame() {
     // Setup game
     if (isGameInit) {
+      // Check if player has placed all ships before starting game
+      if (chooseShipsGrid.children.length !== 0) return;
+
       // Add listener for each square ONLY ONCE
       aiSquares.forEach((square) =>
         square.addEventListener("click", function (e) {
@@ -322,9 +431,15 @@ document.addEventListener("DOMContentLoaded", () => {
         })
       );
 
+      // Remove ability to start new game by pressing the button
+      startGameButton.removeEventListener("click", playGame);
+
       isGameInit = false;
     }
-    if (isGameOver) return;
+
+    if (isGameOver) {
+      return;
+    }
 
     if (isUserTurn) {
       // USER TURN
