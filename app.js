@@ -272,4 +272,64 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   }
+
+  const shipCount = {
+    carrier: 0,
+    battleship: 0,
+    cruiser: 0,
+    submarine: 0,
+    destroyer: 0,
+  };
+
+  function revealSquare(square) {
+    // Add number of hits for each ship type hit ONLY if not hit already
+    if (!square.classList.contains("hit")) {
+      if (square.classList.contains("carrier")) shipCount.carrier++;
+      if (square.classList.contains("battleship")) shipCount.battleship++;
+      if (square.classList.contains("cruiser")) shipCount.cruiser++;
+      if (square.classList.contains("submarine")) shipCount.submarine++;
+      if (square.classList.contains("destroyer")) shipCount.destroyer++;
+    }
+
+    // Set hit cells
+    if (square.classList.contains("filled")) square.classList.add("hit");
+    else square.classList.add("miss");
+
+    isUserTurn = false;
+
+    console.log(shipCount);
+    playGame();
+  }
+
+  // Game logic
+  let isGameOver = false;
+  let isUserTurn = true;
+  let isGameInit = true;
+
+  function playGame() {
+    // Setup game
+    if (isGameInit) {
+      // Add listener for each square ONLY ONCE
+      aiSquares.forEach((square) =>
+        square.addEventListener("click", function (e) {
+          revealSquare(square);
+        })
+      );
+
+      isGameInit = false;
+    }
+    if (isGameOver) return;
+
+    if (isUserTurn) {
+      // USER TURN
+      currentTurnDisplay.innerHTML = "Player Turn";
+    } else {
+      // AI TURN
+      currentTurnDisplay.innerHTML = "Enemy Turn";
+
+      // AI TAKES TURN
+    }
+  }
+
+  startGameButton.addEventListener("click", playGame);
 });

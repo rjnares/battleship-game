@@ -153,3 +153,11 @@
 .carrier {
   background-color: darkred;
 }
+
+.hit {
+  background-color: red;
+}
+
+.miss {
+  background-color: white;
+}
