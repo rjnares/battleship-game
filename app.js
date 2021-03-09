@@ -301,6 +301,12 @@ document.addEventListener("DOMContentLoaded", () => {
     playGame();
   }
 
+  function aiTurn() {
+    console.log("ENEMY TAKES TURN");
+    isUserTurn = true;
+    playGame();
+  }
+
   // Game logic
   let isGameOver = false;
   let isUserTurn = true;
@@ -328,6 +334,7 @@ document.addEventListener("DOMContentLoaded", () => {
       currentTurnDisplay.innerHTML = "Enemy Turn";
 
       // AI TAKES TURN
+      setTimeout(aiTurn, 1500);
     }
   }
 
