@@ -121,13 +121,127 @@ document.addEventListener("DOMContentLoaded", () => {
   shipArray.forEach((ship) => generateRandomAiShipLayout(ship));
 
   // Rotate ships by toggling (adding/removing) a vertical css style of ships
+  const HORIZONTAL = "H";
+  const VERTICAL = "V";
+
+  // Horizontal init by default
+  let orientation = HORIZONTAL;
+
   function rotateShips() {
     carrier.classList.toggle("carrier-container-vertical");
     battleship.classList.toggle("battleship-container-vertical");
     cruiser.classList.toggle("cruiser-container-vertical");
     submarine.classList.toggle("submarine-container-vertical");
     destroyer.classList.toggle("destroyer-container-vertical");
+
+    orientation = orientation == HORIZONTAL ? VERTICAL : HORIZONTAL;
   }
 
   rotateShipsButton.addEventListener("click", rotateShips);
+
+  // Drag/place ships
+  let selectedShipNameWithIndex = null;
+  let draggedShip = null;
+  let draggedShipLength = null;
+
+  ships.forEach((ship) =>
+    ship.addEventListener("mousedown", (e) => {
+      selectedShipNameWithIndex = e.target.id;
+    })
+  );
+
+  ships.forEach((ship) => ship.addEventListener("dragstart", dragStart));
+
+  userSquares.forEach((square) =>
+    square.addEventListener("dragstart", dragStart)
+  );
+  userSquares.forEach((square) => square.addEventListener("dragend", dragEnd));
+  userSquares.forEach((square) =>
+    square.addEventListener("dragover", dragOver)
+  );
+  userSquares.forEach((square) =>
+    square.addEventListener("dragenter", dragEnter)
+  );
+  userSquares.forEach((square) =>
+    square.addEventListener("dragleave", dragLeave)
+  );
+  userSquares.forEach((square) => square.addEventListener("drop", drop));
+
+  function dragStart() {
+    draggedShip = this;
+    draggedShipLength = draggedShip.children.length;
+  }
+
+  function dragEnd() {
+    // console.log("drag end");
+  }
+
+  function dragOver(event) {
+    event.preventDefault();
+  }
+
+  function dragEnter(event) {
+    event.preventDefault();
+  }
+
+  function dragLeave() {
+    // console.log("drag leave");
+  }
+
+  // Bug: can drop ships over each other. Need to check if none of spots are filled
+  function drop() {
+    const dropCellId = parseInt(this.dataset.id);
+    const shipClass = selectedShipNameWithIndex.slice(0, -2);
+    const selectedShipIndex = parseInt(selectedShipNameWithIndex.substr(-1));
+    const cellsToPlace = [];
+
+    if (orientation == HORIZONTAL) {
+      // HORIZONTAL
+
+      // Use drop cell id to find min/max
+      const minLimit = dropCellId - (dropCellId % width);
+      const maxLimit = minLimit + width - 1;
+
+      // Use drop cell id and selected ship index to find low/high
+      const lastShipIndex = parseInt(
+        draggedShip.lastElementChild.id.substr(-1)
+      );
+      const low = dropCellId - selectedShipIndex;
+      const high = dropCellId + (lastShipIndex - selectedShipIndex);
+
+      // If min <= low < high <= max then allow placement, otherwise deny placement
+      if (minLimit <= low && low < high && high <= maxLimit) {
+        // Place ship
+        for (let i = 0; i < draggedShipLength; i++) {
+          const cellPlaceId = dropCellId - selectedShipIndex + i;
+          userSquares[cellPlaceId].classList.add("filled", shipClass);
+        }
+
+        // Remove ship from choose ship grid to avoid placing more than one of same ship
+        chooseShipsGrid.removeChild(draggedShip);
+      }
+    } else {
+      // VERTICAL
+
+      // Use drop cell id and selected ship index to find low/high
+      const lastShipIndex = parseInt(
+        draggedShip.lastElementChild.id.substr(-1)
+      );
+      const low = dropCellId - selectedShipIndex * width;
+      const high = dropCellId + (lastShipIndex - selectedShipIndex) * width;
+
+      // If 0 <= low < high <= 99 then allow placement, otherwise deny placement
+      if (0 <= low && low < high && high <= 99) {
+        // Place ship
+        for (let i = 0; i < draggedShipLength; i++) {
+          const cellPlaceId =
+            dropCellId - selectedShipIndex * width + i * width;
+          userSquares[cellPlaceId].classList.add("filled", shipClass);
+        }
+
+        // Remove ship from choose ship grid to avoid placing more than one of same ship
+        chooseShipsGrid.removeChild(draggedShip);
+      }
+    }
+  }
 });
