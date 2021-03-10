@@ -1,10 +1,11 @@
 {
   "name": "battleship-game",
   "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
+  "description": "My online, multiplayer version of the classic Battleship game",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server",
+    "dev": "nodemon server"
   },
   "repository": {
     "type": "git",
