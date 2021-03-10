@@ -298,7 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
         userShipCount.destroyer ==
       0
     ) {
-      gameInfoDisplay.innerHTML = "ENEMY WINS!";
+      gameInfoDisplay.innerHTML += " ENEMY WINS!";
       isGameOver = true;
     }
 
@@ -311,48 +311,50 @@ document.addEventListener("DOMContentLoaded", () => {
         aiShipCount.destroyer ==
       0
     ) {
-      gameInfoDisplay.innerHTML = "PLAYER WINS!";
+      gameInfoDisplay.innerHTML += " PLAYER WINS!";
       isGameOver = true;
     }
   }
 
   function revealSquare(square) {
+    let message = "";
+
     // Add number of hits for each ship type hit ONLY if not hit already
     if (!square.classList.contains("hit")) {
       if (square.classList.contains("carrier")) {
         aiShipCount.carrier--;
         if (aiShipCount.carrier == 0)
-          gameInfoDisplay.innerHTML = "Player sunk the enemy Carrier!";
+          message = "Player sunk the enemy Carrier!";
       }
       if (square.classList.contains("battleship")) {
         aiShipCount.battleship--;
         if (aiShipCount.battleship == 0)
-          gameInfoDisplay.innerHTML = "Player sunk the enemy Battleship!";
+          message = "Player sunk the enemy Battleship!";
       }
       if (square.classList.contains("cruiser")) {
         aiShipCount.cruiser--;
         if (aiShipCount.cruiser == 0)
-          gameInfoDisplay.innerHTML = "Player sunk the enemy Cruiser!";
+          message = "Player sunk the enemy Cruiser!";
       }
       if (square.classList.contains("submarine")) {
         aiShipCount.submarine--;
         if (aiShipCount.submarine == 0)
-          gameInfoDisplay.innerHTML = "Player sunk the enemy Submarine!";
+          message = "Player sunk the enemy Submarine!";
       }
       if (square.classList.contains("destroyer")) {
         aiShipCount.destroyer--;
         if (aiShipCount.destroyer == 0)
-          gameInfoDisplay.innerHTML = "Player sunk the enemy Destroyer!";
+          message = "Player sunk the enemy Destroyer!";
       }
     }
 
     // Set hit cells
     if (square.classList.contains("filled")) {
       square.classList.add("hit");
-      gameInfoDisplay.innerHTML = "Player scored a hit!";
+      gameInfoDisplay.innerHTML = "Player scored a hit!" + " " + message;
     } else {
       square.classList.add("miss");
-      gameInfoDisplay.innerHTML = "Player missed!";
+      gameInfoDisplay.innerHTML = "Player missed!" + " " + message;
     }
 
     isUserTurn = false;
@@ -363,6 +365,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function aiTurn() {
     let randomUserCell = Math.floor(Math.random() * 100);
     let square = userSquares[randomUserCell];
+    let message = "";
 
     while (
       square.classList.contains("hit") ||
@@ -376,36 +379,36 @@ document.addEventListener("DOMContentLoaded", () => {
     if (square.classList.contains("carrier")) {
       userShipCount.carrier--;
       if (userShipCount.carrier == 0)
-        gameInfoDisplay.innerHTML = "Enemy sunk the player's Carrier!";
+        message = "Enemy sunk the player's Carrier!";
     }
     if (square.classList.contains("battleship")) {
       userShipCount.battleship--;
       if (userShipCount.battleship == 0)
-        gameInfoDisplay.innerHTML = "Enemy sunk the player's Battleship!";
+        message = "Enemy sunk the player's Battleship!";
     }
     if (square.classList.contains("cruiser")) {
       userShipCount.cruiser--;
       if (userShipCount.cruiser == 0)
-        gameInfoDisplay.innerHTML = "Enemy sunk the player's Cruiser!";
+        message = "Enemy sunk the player's Cruiser!";
     }
     if (square.classList.contains("submarine")) {
       userShipCount.submarine--;
       if (userShipCount.submarine == 0)
-        gameInfoDisplay.innerHTML = "Enemy sunk the player's Submarine!";
+        message = "Enemy sunk the player's Submarine!";
     }
     if (square.classList.contains("destroyer")) {
       userShipCount.destroyer--;
       if (userShipCount.destroyer == 0)
-        gameInfoDisplay.innerHTML = "Enemy sunk the player's Destroyer!";
+        message = "Enemy sunk the player's Destroyer!";
     }
 
     // Set hit cells
     if (square.classList.contains("filled")) {
       square.classList.add("hit");
-      gameInfoDisplay.innerHTML = "Enemy scored a hit!";
+      gameInfoDisplay.innerHTML = "Enemy scored a hit!" + " " + message;
     } else {
       square.classList.add("miss");
-      gameInfoDisplay.innerHTML = "Enemy missed!";
+      gameInfoDisplay.innerHTML = "Enemy missed!" + " " + message;
     }
 
     isUserTurn = true;
