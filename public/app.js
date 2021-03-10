@@ -16,6 +16,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const aiSquares = [];
   const width = 10;
 
+  const socket = io();
+
   // Create game board
   function createBoard(grid, squares) {
     for (let i = 0; i < width * width; i++) {
