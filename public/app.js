@@ -16,7 +16,29 @@ document.addEventListener("DOMContentLoaded", () => {
   const aiSquares = [];
   const width = 10;
 
+  // socket.io
+  let gameMode = "";
+  let playerNum = 0;
+  let playerReady = false;
+  let enemyReady = false;
+  let allShipsPlaced = false;
+  let shotFired = -1;
+  let currentPlayer = "player";
   const socket = io();
+
+  // Get player number
+  socket.on("player-number", (num) => {
+    if (num == -1) {
+      // Did not connect in time to fill one of two spots
+      gameInfoDisplay.innerHTML = "Sorry, the server is full.";
+    } else {
+      // Is one of two players connected
+      playerNum = parseInt(num);
+      if (playerNum == 1) currentPlayer = "enemy";
+
+      console.log(playerNum);
+    }
+  });
 
   // Create game board
   function createBoard(grid, squares) {

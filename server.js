@@ -28,11 +28,12 @@ io.on("connection", (socket) => {
     }
   }
 
-  // Ignore player if connections is filled
-  if (playerIndex == -1) return;
-
   // Tell the connecting client what player number they are
+  // even if they are not one of first two players
   socket.emit("player-number", playerIndex);
+
+  // Ignore player if connections is full
+  if (playerIndex == -1) return;
 
   console.log(`Player ${playerIndex} has connected`);
 });
