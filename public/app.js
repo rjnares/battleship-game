@@ -78,6 +78,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (playerNum == 1) currentTurn = ENEMY;
 
         console.log(playerNum);
+
+        // Get other player's status to handle being ready before having an opponent connected
+        socket.emit("check-players");
       }
     });
 
@@ -85,6 +88,25 @@ document.addEventListener("DOMContentLoaded", () => {
     socket.on("player-connection", (num) => {
       console.log(`Player number ${num} has connected or disconnected`);
       playerConnectedOrDisconnected(num);
+    });
+
+    // On enemy read
+    socket.on("enemy-ready", (num) => {
+      enemyReady = true;
+      setReady(num);
+
+      if (playerReady) startOnlineGame(socket);
+    });
+
+    // Check player
+    socket.on("check-players", (players) => {
+      players.forEach((player, index) => {
+        if (player.connected) playerConnectedOrDisconnected(index);
+        if (player.ready) {
+          setReady(index);
+          if (index !== playerNum) enemyReady = true;
+        }
+      });
     });
 
     function playerConnectedOrDisconnected(num) {
@@ -539,9 +561,7 @@ document.addEventListener("DOMContentLoaded", () => {
       isGameInit = false;
     }
 
-    if (isGameOver) {
-      return;
-    }
+    if (isGameOver) return;
 
     if (isUserTurn) {
       // USER TURN
@@ -555,5 +575,40 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function startOnlineGame(socket) {}
+  function startOnlineGame(socket) {
+    // // Setup game ???
+    // if (isGameInit) {
+    //   // Add listener for each square ONLY ONCE
+    //   aiSquares.forEach((square) =>
+    //     square.addEventListener("click", function (e) {
+    //       revealSquare(square);
+    //     })
+    //   );
+
+    //   // Remove ability to start new game by pressing the button
+    //   startGameButton.removeEventListener("click", startAiGame);
+
+    //   isGameInit = false;
+    // }
+
+    if (isGameOver) return;
+
+    if (!playerReady) {
+      socket.emit("player-ready");
+      playerReady = true;
+      setReady(playerNum);
+    }
+
+    if (enemyReady) {
+      if (currentTurn == PLAYER) currentTurnDisplay.innerHTML = "Player Turn";
+      else currentTurnDisplay.innerHTML = "Enemy Turn";
+    }
+  }
+
+  function setReady(num) {
+    const number = parseInt(num);
+    let player = `.p${number + 1}`;
+
+    document.querySelector(`${player} .ready span`).classList.toggle("green");
+  }
 });
