@@ -9,33 +9,43 @@ document.addEventListener("DOMContentLoaded", () => {
   playAiButton.addEventListener("click", playAi);
   playOnlineButton.addEventListener("click", playOnline);
 
-  /* Current Turn Variables */
+  /* Current Turn */
   const ENEMY = 0;
   const PLAYER = 1;
   let currentTurn = null;
+  let shotFired = -1;
 
+  /* Grids */
   const userGrid = document.querySelector(".grid-user");
   const aiGrid = document.querySelector(".grid-ai");
   const chooseShipsGrid = document.querySelector(".grid-choose-ships");
-  const ships = document.querySelectorAll(".ship");
+
+  /* Grid Squares */
+  const userSquares = [];
+  const aiSquares = [];
+  const CELL_SIDE = 10;
+
+  /* All Ship Elements */
+  const allShipElements = document.querySelectorAll(".ship");
+
+  /* Ship Classes */
   const carrier = document.querySelector(".carrier-container");
   const battleship = document.querySelector(".battleship-container");
   const cruiser = document.querySelector(".cruiser-container");
   const submarine = document.querySelector(".submarine-container");
   const destroyer = document.querySelector(".destroyer-container");
+
+  /* Game Functions */
   const startGameButton = document.querySelector("#start-game");
   const rotateShipsButton = document.querySelector("#rotate-ships");
   const currentTurnDisplay = document.querySelector("#current-turn");
   const gameInfoDisplay = document.querySelector("#game-info");
-  const userSquares = [];
-  const aiSquares = [];
-  const width = 10;
 
+  /* Player Info */
   let playerNum = 0;
   let playerReady = false;
   let enemyReady = false;
   let allShipsPlaced = false;
-  let shotFired = -1;
 
   // Play AI Code
   function playAi() {
@@ -74,12 +84,33 @@ document.addEventListener("DOMContentLoaded", () => {
     // Another player has connected/disconnected
     socket.on("player-connection", (num) => {
       console.log(`Player number ${num} has connected or disconnected`);
+      playerConnectedOrDisconnected(num);
+    });
+
+    function playerConnectedOrDisconnected(num) {
+      const number = parseInt(num);
+      let player = `.p${number + 1}`;
+
+      document
+        .querySelector(`${player} .connected span`)
+        .classList.toggle("green");
+
+      if (number == playerNum) {
+        document.querySelector(player).style.fontWeight = "bold";
+      }
+    }
+
+    startGameButton.addEventListener("click", () => {
+      if (allShipsPlaced) startOnlineGame(socket);
+      else
+        gameInfoDisplay.innerHTML =
+          "Cannot start game unless all ships are placed.";
     });
   }
 
   // Create game board
   function createBoard(grid, squares) {
-    for (let i = 0; i < width * width; i++) {
+    for (let i = 0; i < CELL_SIDE * CELL_SIDE; i++) {
       const square = document.createElement("div");
       square.dataset.id = i;
       grid.appendChild(square);
@@ -96,35 +127,35 @@ document.addEventListener("DOMContentLoaded", () => {
       name: "carrier",
       directions: [
         [0, 1, 2, 3, 4],
-        [0, width, 2 * width, 3 * width, 4 * width],
+        [0, CELL_SIDE, 2 * CELL_SIDE, 3 * CELL_SIDE, 4 * CELL_SIDE],
       ],
     },
     {
       name: "battleship",
       directions: [
         [0, 1, 2, 3],
-        [0, width, 2 * width, 3 * width],
+        [0, CELL_SIDE, 2 * CELL_SIDE, 3 * CELL_SIDE],
       ],
     },
     {
       name: "cruiser",
       directions: [
         [0, 1, 2],
-        [0, width, 2 * width],
+        [0, CELL_SIDE, 2 * CELL_SIDE],
       ],
     },
     {
       name: "submarine",
       directions: [
         [0, 1, 2],
-        [0, width, 2 * width],
+        [0, CELL_SIDE, 2 * CELL_SIDE],
       ],
     },
     {
       name: "destroyer",
       directions: [
         [0, 1],
-        [0, width],
+        [0, CELL_SIDE],
       ],
     },
   ];
@@ -132,13 +163,13 @@ document.addEventListener("DOMContentLoaded", () => {
   function isValidStart(start, shipLength, direction) {
     if (direction) {
       // if vertical, only need to check upper limit on start cell
-      const upperLimit = 99 - (shipLength - 1) * width;
+      const upperLimit = 99 - (shipLength - 1) * CELL_SIDE;
 
       return start <= upperLimit;
     } else {
       // if horizontal, need to check the mod of upper limit since it varies for each row
-      const upperModLimit = width - shipLength;
-      const startModValue = start % width;
+      const upperModLimit = CELL_SIDE - shipLength;
+      const startModValue = start % CELL_SIDE;
 
       return startModValue <= upperModLimit;
     }
@@ -203,13 +234,15 @@ document.addEventListener("DOMContentLoaded", () => {
   let draggedShip = null;
   let draggedShipLength = null;
 
-  ships.forEach((ship) =>
+  allShipElements.forEach((ship) =>
     ship.addEventListener("mousedown", (e) => {
       selectedShipNameWithIndex = e.target.id;
     })
   );
 
-  ships.forEach((ship) => ship.addEventListener("dragstart", dragStart));
+  allShipElements.forEach((ship) =>
+    ship.addEventListener("dragstart", dragStart)
+  );
 
   userSquares.forEach((square) =>
     square.addEventListener("dragstart", dragStart)
@@ -258,7 +291,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } else {
       for (let i = 0; i < draggedShipLength; i++) {
-        const cellPlaceId = dropCellId - selectedShipIndex * width + i * width;
+        const cellPlaceId =
+          dropCellId - selectedShipIndex * CELL_SIDE + i * CELL_SIDE;
         const filled = userSquares[cellPlaceId].classList.contains("filled");
         if (filled) pass = false;
       }
@@ -275,8 +309,8 @@ document.addEventListener("DOMContentLoaded", () => {
       // HORIZONTAL
 
       // Use drop cell id to find min/max
-      const minLimit = dropCellId - (dropCellId % width);
-      const maxLimit = minLimit + width - 1;
+      const minLimit = dropCellId - (dropCellId % CELL_SIDE);
+      const maxLimit = minLimit + CELL_SIDE - 1;
 
       // Use drop cell id and selected ship index to find low/high
       const lastShipIndex = parseInt(
@@ -308,8 +342,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const lastShipIndex = parseInt(
         draggedShip.lastElementChild.id.substr(-1)
       );
-      const low = dropCellId - selectedShipIndex * width;
-      const high = dropCellId + (lastShipIndex - selectedShipIndex) * width;
+      const low = dropCellId - selectedShipIndex * CELL_SIDE;
+      const high = dropCellId + (lastShipIndex - selectedShipIndex) * CELL_SIDE;
 
       // If 0 <= low < high <= 99 then allow placement, otherwise deny placement
       if (
@@ -321,7 +355,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Place ship
         for (let i = 0; i < draggedShipLength; i++) {
           const cellPlaceId =
-            dropCellId - selectedShipIndex * width + i * width;
+            dropCellId - selectedShipIndex * CELL_SIDE + i * CELL_SIDE;
           userSquares[cellPlaceId].classList.add("filled", shipClass);
         }
 
@@ -329,6 +363,8 @@ document.addEventListener("DOMContentLoaded", () => {
         chooseShipsGrid.removeChild(draggedShip);
       }
     }
+    // Check if player has placed all ships
+    if (!chooseShipsGrid.querySelector(".ship")) allShipsPlaced = true;
   }
 
   const aiShipCount = {
@@ -483,8 +519,12 @@ document.addEventListener("DOMContentLoaded", () => {
   function startAiGame() {
     // Setup game
     if (isGameInit) {
-      // Check if player has placed all ships before starting game
-      if (chooseShipsGrid.children.length !== 0) return;
+      // Don't start game unless all ships placed
+      if (!allShipsPlaced) {
+        gameInfoDisplay.innerHTML =
+          "Cannot start game unless all ships are placed.";
+        return;
+      }
 
       // Add listener for each square ONLY ONCE
       aiSquares.forEach((square) =>
@@ -514,4 +554,6 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(aiTurn, 1500);
     }
   }
+
+  function startOnlineGame(socket) {}
 });
