@@ -32,8 +32,14 @@ io.on("connection", (socket) => {
   // even if they are not one of first two players
   socket.emit("player-number", playerIndex);
 
+  console.log(`Player ${playerIndex} has connected`);
+
   // Ignore player if connections is full
   if (playerIndex == -1) return;
 
-  console.log(`Player ${playerIndex} has connected`);
+  //Sets connected player's ready state to false initially by default
+  connections[playerIndex] = false;
+
+  // Tell every client what player number just connected
+  socket.broadcast.emit("player-connection", playerIndex);
 });

@@ -1,4 +1,19 @@
 document.addEventListener("DOMContentLoaded", () => {
+  /* Game Mode Selection */
+  let gameMode = null;
+  const PLAY_AI = 0;
+  const PLAY_ONLINE = 1;
+  const playAiButton = document.querySelector("#play-ai");
+  const playOnlineButton = document.querySelector("#play-online");
+
+  playAiButton.addEventListener("click", playAi);
+  playOnlineButton.addEventListener("click", playOnline);
+
+  /* Current Turn Variables */
+  const ENEMY = 0;
+  const PLAYER = 1;
+  let currentTurn = null;
+
   const userGrid = document.querySelector(".grid-user");
   const aiGrid = document.querySelector(".grid-ai");
   const chooseShipsGrid = document.querySelector(".grid-choose-ships");
@@ -16,29 +31,51 @@ document.addEventListener("DOMContentLoaded", () => {
   const aiSquares = [];
   const width = 10;
 
-  // socket.io
-  let gameMode = "";
   let playerNum = 0;
   let playerReady = false;
   let enemyReady = false;
   let allShipsPlaced = false;
   let shotFired = -1;
-  let currentPlayer = "player";
-  const socket = io();
 
-  // Get player number
-  socket.on("player-number", (num) => {
-    if (num == -1) {
-      // Did not connect in time to fill one of two spots
-      gameInfoDisplay.innerHTML = "Sorry, the server is full.";
-    } else {
-      // Is one of two players connected
-      playerNum = parseInt(num);
-      if (playerNum == 1) currentPlayer = "enemy";
+  // Play AI Code
+  function playAi() {
+    gameMode = PLAY_AI;
 
-      console.log(playerNum);
-    }
-  });
+    // Generate random placement for each AI ship
+    shipArray.forEach((ship) => generateRandomShipLayout(ship));
+
+    // Start Game button should start game to play against AI
+    startGameButton.addEventListener("click", startAiGame);
+  }
+
+  // Play Online Code
+  function playOnline() {
+    gameMode = PLAY_ONLINE;
+
+    const socket = io();
+
+    // Get player number
+    socket.on("player-number", (num) => {
+      if (num == -1) {
+        // Did not connect in time to fill one of two spots
+        gameInfoDisplay.innerHTML = "Sorry, the server is full.";
+      } else {
+        // Is one of two players connected
+        playerNum = parseInt(num);
+
+        // playerNum == -1 means currentTurn stays null
+        if (playerNum == 0) currentTurn = PLAYER;
+        if (playerNum == 1) currentTurn = ENEMY;
+
+        console.log(playerNum);
+      }
+    });
+
+    // Another player has connected/disconnected
+    socket.on("player-connection", (num) => {
+      console.log(`Player number ${num} has connected or disconnected`);
+    });
+  }
 
   // Create game board
   function createBoard(grid, squares) {
@@ -115,7 +152,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Generate random AI ship layout
-  function generateRandomAiShipLayout(ship) {
+  // TODO: Make function take a grid as input so that users can press button to make a random ship layout for them too
+  function generateRandomShipLayout(ship) {
     const shipIndexes = ship.directions;
     const shipLength = shipIndexes[0].length;
 
@@ -140,9 +178,6 @@ document.addEventListener("DOMContentLoaded", () => {
       aiSquares[randomStart + index].classList.add("filled", ship.name)
     );
   }
-
-  // Generate random placement for each ship
-  shipArray.forEach((ship) => generateRandomAiShipLayout(ship));
 
   // Rotate ships by toggling (adding/removing) a vertical css style of ships
   const HORIZONTAL = "H";
@@ -383,7 +418,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     isUserTurn = false;
     checkGameOver();
-    playGame();
+    startAiGame();
   }
 
   function aiTurn() {
@@ -437,7 +472,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     isUserTurn = true;
     checkGameOver();
-    playGame();
+    startAiGame();
   }
 
   // Game logic
@@ -445,7 +480,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let isGameInit = true;
   let isGameOver = false;
 
-  function playGame() {
+  function startAiGame() {
     // Setup game
     if (isGameInit) {
       // Check if player has placed all ships before starting game
@@ -459,7 +494,7 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
       // Remove ability to start new game by pressing the button
-      startGameButton.removeEventListener("click", playGame);
+      startGameButton.removeEventListener("click", startAiGame);
 
       isGameInit = false;
     }
@@ -479,6 +514,4 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(aiTurn, 1500);
     }
   }
-
-  startGameButton.addEventListener("click", playGame);
 });
