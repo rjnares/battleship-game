@@ -7,7 +7,7 @@
   height: 400px;
   display: flex;
   flex-wrap: wrap;
-  background-color: whitesmoke;
+  background-color: lavender;
   margin: 20px;
 }
 
@@ -36,7 +36,7 @@
 .grid-choose-ships {
   width: 400px;
   height: 400px;
-  background-color: lightgreen;
+  background-color: white;
   margin: 20px;
 }
 
