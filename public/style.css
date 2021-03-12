@@ -7,7 +7,7 @@
   height: 400px;
   display: flex;
   flex-wrap: wrap;
-  background-color: lightblue;
+  background-color: whitesmoke;
   margin: 20px;
 }
 
@@ -17,11 +17,11 @@
 }
 
 .grid-user div {
-  outline: 1px dashed darkblue;
+  outline: 1px dashed steelblue;
 }
 
 .grid-ai div {
-  outline: 1px dashed red;
+  outline: 1px dashed salmon;
 }
 
 .grid-ai {
@@ -29,7 +29,7 @@
   height: 400px;
   display: flex;
   flex-wrap: wrap;
-  background-color: lightcoral;
+  background-color: wheat;
   margin: 20px;
 }
 
@@ -47,7 +47,7 @@
 .destroyer-container {
   width: 80px;
   height: 40px;
-  background-color: darkblue;
+  background-color: maroon;
   margin: 10px;
   display: flex;
 }
@@ -55,7 +55,7 @@
 .destroyer-container-vertical {
   width: 40px;
   height: 80px;
-  background-color: darkblue;
+  background-color: maroon;
   margin: 10px;
   display: flex;
   flex-wrap: wrap;
@@ -64,7 +64,7 @@
 .submarine-container {
   width: 120px;
   height: 40px;
-  background-color: darkcyan;
+  background-color: chartreuse;
   margin: 10px;
   display: flex;
 }
@@ -72,7 +72,7 @@
 .submarine-container-vertical {
   width: 40px;
   height: 120px;
-  background-color: darkcyan;
+  background-color: chartreuse;
   margin: 10px;
   display: flex;
   flex-wrap: wrap;
@@ -81,7 +81,7 @@
 .cruiser-container {
   width: 120px;
   height: 40px;
-  background-color: chartreuse;
+  background-color: midnightblue;
   margin: 10px;
   display: flex;
 }
@@ -89,7 +89,7 @@
 .cruiser-container-vertical {
   width: 40px;
   height: 120px;
-  background-color: chartreuse;
+  background-color: midnightblue;
   margin: 10px;
   display: flex;
   flex-wrap: wrap;
@@ -115,7 +115,7 @@
 .carrier-container {
   width: 200px;
   height: 40px;
-  background-color: darkred;
+  background-color: rebeccapurple;
   margin: 10px;
   display: flex;
 }
@@ -123,7 +123,7 @@
 .carrier-container-vertical {
   width: 40px;
   height: 200px;
-  background-color: darkred;
+  background-color: rebeccapurple;
   margin: 10px;
   display: flex;
   flex-wrap: wrap;
@@ -135,15 +135,15 @@
 }
 
 .destroyer {
-  background-color: darkblue;
+  background-color: maroon;
 }
 
 .submarine {
-  background-color: darkcyan;
+  background-color: chartreuse;
 }
 
 .cruiser {
-  background-color: chartreuse;
+  background-color: midnightblue;
 }
 
 .battleship {
@@ -151,7 +151,7 @@
 }
 
 .carrier {
-  background-color: darkred;
+  background-color: rebeccapurple;
 }
 
 .hit {

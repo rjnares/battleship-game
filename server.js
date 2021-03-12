@@ -85,4 +85,11 @@ io.on("connection", (socket) => {
     // Forward reply to other player
     socket.broadcast.emit("fire-reply", cellClassList);
   });
+
+  // Set timeout
+  setTimeout(() => {
+    connections[playerIndex] = null;
+    socket.emit("timeout");
+    socket.disconnect();
+  }, 600000);
 });

@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
     socket.on("player-number", (num) => {
       if (num == -1) {
         // Did not connect in time to fill one of two spots
-        gameInfoDisplay.innerHTML = "Sorry, the server is full.";
+        gameInfoDisplay.innerHTML = "Server is full";
       } else {
         // Is one of two players connected
         playerNum = parseInt(num);
@@ -136,6 +136,11 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
+    // On timeout
+    socket.on("timeout", () => {
+      gameInfoDisplay.innerHTML = "You have reached the 10 minute limit";
+    });
+
     // Set up event listeners for firing
     enemyCells.forEach((cell) => {
       cell.addEventListener("click", () => {
@@ -161,10 +166,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     startGameButton.addEventListener("click", () => {
-      if (allShipsPlaced) playOnlineGame(socket);
-      else
-        gameInfoDisplay.innerHTML =
-          "Cannot start game unless all ships are placed.";
+      if (allShipsPlaced) {
+        /* Clear previous messages when starting game */
+        gameInfoDisplay.innerHTML = "";
+        playOnlineGame(socket);
+      } else gameInfoDisplay.innerHTML = "All ships must be placed";
     });
   }
 
@@ -423,29 +429,25 @@ document.addEventListener("DOMContentLoaded", () => {
     destroyer: 2,
   };
 
+  function totalShipHp(shipHp) {
+    return (
+      shipHp.carrier +
+      shipHp.battleship +
+      shipHp.cruiser +
+      shipHp.submarine +
+      shipHp.destroyer
+    );
+  }
+
   function checkGameOver() {
-    // Check if all player ship counts are 0, if so, end game
-    if (
-      playerShipHp.carrier +
-        playerShipHp.battleship +
-        playerShipHp.cruiser +
-        playerShipHp.submarine +
-        playerShipHp.destroyer ==
-      0
-    ) {
+    /* Check if total player ship HP reaches 0, if so, end game */
+    if (totalShipHp(playerShipHp) == 0) {
       gameInfoDisplay.innerHTML += ". Enemy WINS!";
       isGameOver = true;
     }
 
-    // Check if all ai ship counts are 0, if so, end game
-    if (
-      enemyShipHp.carrier +
-        enemyShipHp.battleship +
-        enemyShipHp.cruiser +
-        enemyShipHp.submarine +
-        enemyShipHp.destroyer ==
-      0
-    ) {
+    /* Check if total enemy ship HP reaches 0, if so, end game */
+    if (totalShipHp(enemyShipHp) == 0) {
       gameInfoDisplay.innerHTML += ". You WIN!";
       isGameOver = true;
     }
@@ -456,7 +458,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const enemyCell = enemyGrid.querySelector(`div[data-id='${cellFireId}']`);
     const cellClassList = Object.values(cellClassObject);
 
-    console.log(cellClassList);
     /* Decrease ship HP only if ship cell hasn't been hit */
     if (
       !enemyCell.classList.contains("hit") &&
@@ -481,8 +482,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    console.log(enemyShipHp);
-
     /* Set ship cell as hit or miss */
     if (cellClassList.includes("filled")) {
       enemyCell.classList.add("hit");
@@ -500,7 +499,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function enemyTurn(cell) {
     let info = "";
-    let cellClassList = playerCells[cell].classList;
+    let cellClassList =
+      gameMode == PLAY_ONLINE ? playerCells[cell].classList : null;
 
     if (gameMode == PLAY_AI) {
       do {
@@ -527,8 +527,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    console.log(playerShipHp);
-
     /* Set ship cell as hit or miss */
     if (cellClassList.contains("filled")) {
       cellClassList.add("hit");
@@ -549,37 +547,52 @@ document.addEventListener("DOMContentLoaded", () => {
   let isGameOver = false;
 
   function playAiGame() {
-    // Setup game
+    /* Initialize Game */
     if (isGameInit) {
-      // Don't start game unless all ships placed
+      /* Prevent game start unless all player ships are placed */
       if (!allShipsPlaced) {
-        gameInfoDisplay.innerHTML =
-          "Cannot start game unless all ships are placed.";
+        gameInfoDisplay.innerHTML = "All ships must be placed";
         return;
       }
 
-      // Add listener for each cell ONLY ONCE
-      enemyCells.forEach((cell) =>
-        cell.addEventListener("click", () => revealEnemyCell(cell.classList))
-      );
+      /* Add click listener for enemy cells to handle firing */
+      /* Check if player turn to prevent player taking turn during enemy AI turn */
+      enemyCells.forEach((cell) => {
+        cell.addEventListener("click", () => {
+          if (currentTurn == PLAYER) {
+            cellFireId = cell.dataset.id;
+            revealEnemyCell(cell.classList);
+          }
+        });
+      });
 
-      // Remove ability to start new game by pressing the button
+      /* Prevent game start button click during current game */
+      /* TODO: Pressing button should reset game with new enemy AI ship placements */
       startGameButton.removeEventListener("click", playAiGame);
 
+      /* Player goes first by default in 'Play AI' mode */
+      currentTurn = PLAYER;
+
+      /* Clear previous messages when starting game */
+      currentTurnDisplay.innerHTML = "";
+      gameInfoDisplay.innerHTML = "";
+
+      /* Set false to prevent game initialization mid-game */
       isGameInit = false;
     }
 
     if (isGameOver) return;
 
     if (currentTurn == PLAYER) {
-      // PLAYER TURN
+      /* Display Player Turn */
       currentTurnDisplay.innerHTML = "Your Turn";
     } else {
-      // AI TURN
+      /* Display Enemy AI Turn */
       currentTurnDisplay.innerHTML = "Enemy AI Turn";
 
-      // AI TAKES TURN
-      setTimeout(enemyTurn, 1500);
+      /* Simulate AI Taking Turn */
+      /* TODO: Make a smarter AI */
+      setTimeout(enemyTurn, 3000);
     }
   }
 
