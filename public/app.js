@@ -16,8 +16,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let cellFireId = null;
 
   /* Grids */
-  const playerGrid = document.querySelector(".grid-user");
-  const enemyGrid = document.querySelector(".grid-ai");
+  const playerGrid = document.querySelector(".grid-player");
+  const enemyGrid = document.querySelector(".grid-enemy");
   const chooseShipsGrid = document.querySelector(".grid-choose-ships");
 
   /* Grid Cells */
@@ -61,18 +61,18 @@ document.addEventListener("DOMContentLoaded", () => {
   createGameGrid(playerGrid, playerCells);
   createGameGrid(enemyGrid, enemyCells);
 
-  // Play AI Code
+  /* Play AI Code */
   function playAi() {
     gameMode = PLAY_AI;
 
-    // Generate random placement for each AI ship
+    /* Generate random enemy AI ship placement */
     shipArray.forEach((ship) => generateRandomShipLayout(ship));
 
-    // Start Game button should start game to play against AI
+    /* Add click listener for start game button to start game against enemy AI */
     startGameButton.addEventListener("click", playAiGame);
   }
 
-  // Play Online Code
+  /* Play Online Code */
   function playOnline() {
     gameMode = PLAY_ONLINE;
 

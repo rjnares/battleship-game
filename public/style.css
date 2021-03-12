@@ -2,7 +2,7 @@
   display: flex;
 }
 
-.grid-user {
+.grid-player {
   width: 400px;
   height: 400px;
   display: flex;
@@ -16,15 +16,15 @@
   height: 40px;
 }
 
-.grid-user div {
+.grid-player div {
   outline: 1px dashed steelblue;
 }
 
-.grid-ai div {
+.grid-enemy div {
   outline: 1px dashed salmon;
 }
 
-.grid-ai {
+.grid-enemy {
   width: 400px;
   height: 400px;
   display: flex;
