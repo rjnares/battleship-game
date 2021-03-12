@@ -13,16 +13,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const ENEMY = 0;
   const PLAYER = 1;
   let currentTurn = null;
-  let shotFired = -1;
+  let cellFireId = null;
 
   /* Grids */
-  const userGrid = document.querySelector(".grid-user");
-  const aiGrid = document.querySelector(".grid-ai");
+  const playerGrid = document.querySelector(".grid-user");
+  const enemyGrid = document.querySelector(".grid-ai");
   const chooseShipsGrid = document.querySelector(".grid-choose-ships");
 
-  /* Grid Squares */
-  const userSquares = [];
-  const aiSquares = [];
+  /* Grid Cells */
+  const playerCells = [];
+  const enemyCells = [];
   const CELL_SIDE = 10;
 
   /* All Ship Elements */
@@ -47,6 +47,20 @@ document.addEventListener("DOMContentLoaded", () => {
   let enemyReady = false;
   let allShipsPlaced = false;
 
+  /* Create Game Grids */
+  function createGameGrid(grid, cells) {
+    for (let i = 0; i < CELL_SIDE * CELL_SIDE; i++) {
+      const cell = document.createElement("div");
+      cell.dataset.id = i;
+      grid.appendChild(cell);
+      cells.push(cell);
+    }
+  }
+
+  /* Create Player & Enemy Game Grids */
+  createGameGrid(playerGrid, playerCells);
+  createGameGrid(enemyGrid, enemyCells);
+
   // Play AI Code
   function playAi() {
     gameMode = PLAY_AI;
@@ -55,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
     shipArray.forEach((ship) => generateRandomShipLayout(ship));
 
     // Start Game button should start game to play against AI
-    startGameButton.addEventListener("click", startAiGame);
+    startGameButton.addEventListener("click", playAiGame);
   }
 
   // Play Online Code
@@ -90,25 +104,6 @@ document.addEventListener("DOMContentLoaded", () => {
       playerConnectedOrDisconnected(num);
     });
 
-    // On enemy read
-    socket.on("enemy-ready", (num) => {
-      enemyReady = true;
-      setReady(num);
-
-      if (playerReady) startOnlineGame(socket);
-    });
-
-    // Check player
-    socket.on("check-players", (players) => {
-      players.forEach((player, index) => {
-        if (player.connected) playerConnectedOrDisconnected(index);
-        if (player.ready) {
-          setReady(index);
-          if (index !== playerNum) enemyReady = true;
-        }
-      });
-    });
-
     function playerConnectedOrDisconnected(num) {
       const number = parseInt(num);
       let player = `.p${number + 1}`;
@@ -122,26 +117,56 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    // On enemy read
+    socket.on("enemy-ready", (num) => {
+      enemyReady = true;
+      setReady(num);
+
+      if (playerReady) playOnlineGame(socket);
+    });
+
+    // Check player
+    socket.on("check-players", (players) => {
+      players.forEach((player, index) => {
+        if (player.connected) playerConnectedOrDisconnected(index);
+        if (player.ready) {
+          setReady(index);
+          if (index !== playerNum) enemyReady = true;
+        }
+      });
+    });
+
+    // Set up event listeners for firing
+    enemyCells.forEach((cell) => {
+      cell.addEventListener("click", () => {
+        if (currentTurn == PLAYER && playerReady && enemyReady) {
+          cellFireId = cell.dataset.id;
+          socket.emit("fire", cellFireId);
+        }
+      });
+    });
+
+    // On fire received
+    socket.on("fire", (id) => {
+      enemyTurn(id);
+      const cell = playerCells[id];
+      socket.emit("fire-reply", cell.classList);
+      playOnlineGame(socket);
+    });
+
+    // On fire reply received
+    socket.on("fire-reply", (cellClassObject) => {
+      revealEnemyCell(cellClassObject);
+      playOnlineGame(socket);
+    });
+
     startGameButton.addEventListener("click", () => {
-      if (allShipsPlaced) startOnlineGame(socket);
+      if (allShipsPlaced) playOnlineGame(socket);
       else
         gameInfoDisplay.innerHTML =
           "Cannot start game unless all ships are placed.";
     });
   }
-
-  // Create game board
-  function createBoard(grid, squares) {
-    for (let i = 0; i < CELL_SIDE * CELL_SIDE; i++) {
-      const square = document.createElement("div");
-      square.dataset.id = i;
-      grid.appendChild(square);
-      squares.push(square);
-    }
-  }
-
-  createBoard(userGrid, userSquares);
-  createBoard(aiGrid, aiSquares);
 
   // Ships
   const shipArray = [
@@ -200,7 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function isFilled(start, direction) {
     // check if any cells of current ship are already filled by another ship
     return direction.some((index) =>
-      aiSquares[start + index].classList.contains("filled")
+      enemyCells[start + index].classList.contains("filled")
     );
   }
 
@@ -228,7 +253,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // If here, then we have both valid random start and no cells are already filled
     currentDirection.forEach((index) =>
-      aiSquares[randomStart + index].classList.add("filled", ship.name)
+      enemyCells[randomStart + index].classList.add("filled", ship.name)
     );
   }
 
@@ -266,29 +291,24 @@ document.addEventListener("DOMContentLoaded", () => {
     ship.addEventListener("dragstart", dragStart)
   );
 
-  userSquares.forEach((square) =>
-    square.addEventListener("dragstart", dragStart)
-  );
-  userSquares.forEach((square) => square.addEventListener("dragend", dragEnd));
-  userSquares.forEach((square) =>
-    square.addEventListener("dragover", dragOver)
-  );
-  userSquares.forEach((square) =>
-    square.addEventListener("dragenter", dragEnter)
-  );
-  userSquares.forEach((square) =>
-    square.addEventListener("dragleave", dragLeave)
-  );
-  userSquares.forEach((square) => square.addEventListener("drop", drop));
+  playerCells.forEach((cell) => cell.addEventListener("dragstart", dragStart));
+
+  playerCells.forEach((cell) => cell.addEventListener("dragend", dragEnd));
+
+  playerCells.forEach((cell) => cell.addEventListener("dragover", dragOver));
+
+  playerCells.forEach((cell) => cell.addEventListener("dragenter", dragEnter));
+
+  playerCells.forEach((cell) => cell.addEventListener("dragleave", dragLeave));
+
+  playerCells.forEach((cell) => cell.addEventListener("drop", drop));
 
   function dragStart() {
     draggedShip = this;
     draggedShipLength = draggedShip.children.length;
   }
 
-  function dragEnd() {
-    // console.log("drag end");
-  }
+  function dragEnd() {}
 
   function dragOver(event) {
     event.preventDefault();
@@ -298,9 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
     event.preventDefault();
   }
 
-  function dragLeave() {
-    // console.log("drag leave");
-  }
+  function dragLeave() {}
 
   function canPlace(dropCellId, selectedShipIndex) {
     let pass = true;
@@ -308,14 +326,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (orientation == HORIZONTAL) {
       for (let i = 0; i < draggedShipLength; i++) {
         const cellPlaceId = dropCellId - selectedShipIndex + i;
-        const filled = userSquares[cellPlaceId].classList.contains("filled");
+        const filled = playerCells[cellPlaceId].classList.contains("filled");
         if (filled) pass = false;
       }
     } else {
       for (let i = 0; i < draggedShipLength; i++) {
         const cellPlaceId =
           dropCellId - selectedShipIndex * CELL_SIDE + i * CELL_SIDE;
-        const filled = userSquares[cellPlaceId].classList.contains("filled");
+        const filled = playerCells[cellPlaceId].classList.contains("filled");
         if (filled) pass = false;
       }
     }
@@ -351,7 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Place ship
         for (let i = 0; i < draggedShipLength; i++) {
           const cellPlaceId = dropCellId - selectedShipIndex + i;
-          userSquares[cellPlaceId].classList.add("filled", shipClass);
+          playerCells[cellPlaceId].classList.add("filled", shipClass);
         }
 
         // Remove ship from choose ship grid to avoid placing more than one of same ship
@@ -378,7 +396,7 @@ document.addEventListener("DOMContentLoaded", () => {
         for (let i = 0; i < draggedShipLength; i++) {
           const cellPlaceId =
             dropCellId - selectedShipIndex * CELL_SIDE + i * CELL_SIDE;
-          userSquares[cellPlaceId].classList.add("filled", shipClass);
+          playerCells[cellPlaceId].classList.add("filled", shipClass);
         }
 
         // Remove ship from choose ship grid to avoid placing more than one of same ship
@@ -389,7 +407,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!chooseShipsGrid.querySelector(".ship")) allShipsPlaced = true;
   }
 
-  const aiShipCount = {
+  const enemyShipHp = {
     carrier: 5,
     battleship: 4,
     cruiser: 3,
@@ -397,7 +415,7 @@ document.addEventListener("DOMContentLoaded", () => {
     destroyer: 2,
   };
 
-  const userShipCount = {
+  const playerShipHp = {
     carrier: 5,
     battleship: 4,
     cruiser: 3,
@@ -408,137 +426,129 @@ document.addEventListener("DOMContentLoaded", () => {
   function checkGameOver() {
     // Check if all player ship counts are 0, if so, end game
     if (
-      userShipCount.carrier +
-        userShipCount.battleship +
-        userShipCount.cruiser +
-        userShipCount.submarine +
-        userShipCount.destroyer ==
+      playerShipHp.carrier +
+        playerShipHp.battleship +
+        playerShipHp.cruiser +
+        playerShipHp.submarine +
+        playerShipHp.destroyer ==
       0
     ) {
-      gameInfoDisplay.innerHTML += " ENEMY WINS!";
+      gameInfoDisplay.innerHTML += ". Enemy WINS!";
       isGameOver = true;
     }
 
     // Check if all ai ship counts are 0, if so, end game
     if (
-      aiShipCount.carrier +
-        aiShipCount.battleship +
-        aiShipCount.cruiser +
-        aiShipCount.submarine +
-        aiShipCount.destroyer ==
+      enemyShipHp.carrier +
+        enemyShipHp.battleship +
+        enemyShipHp.cruiser +
+        enemyShipHp.submarine +
+        enemyShipHp.destroyer ==
       0
     ) {
-      gameInfoDisplay.innerHTML += " PLAYER WINS!";
+      gameInfoDisplay.innerHTML += ". You WIN!";
       isGameOver = true;
     }
   }
 
-  function revealSquare(square) {
-    let message = "";
+  function revealEnemyCell(cellClassObject) {
+    let info = "";
+    const enemyCell = enemyGrid.querySelector(`div[data-id='${cellFireId}']`);
+    const cellClassList = Object.values(cellClassObject);
 
-    // Add number of hits for each ship type hit ONLY if not hit already
-    if (!square.classList.contains("hit")) {
-      if (square.classList.contains("carrier")) {
-        aiShipCount.carrier--;
-        if (aiShipCount.carrier == 0)
-          message = "Player sunk the enemy Carrier!";
+    console.log(cellClassList);
+    /* Decrease ship HP only if ship cell hasn't been hit */
+    if (
+      !enemyCell.classList.contains("hit") &&
+      !isGameOver &&
+      currentTurn == PLAYER
+    ) {
+      if (cellClassList.includes("carrier")) {
+        if (--enemyShipHp.carrier == 0) info = "and sunk the enemy Carrier";
       }
-      if (square.classList.contains("battleship")) {
-        aiShipCount.battleship--;
-        if (aiShipCount.battleship == 0)
-          message = "Player sunk the enemy Battleship!";
+      if (cellClassList.includes("battleship")) {
+        if (--enemyShipHp.battleship == 0)
+          info = "and sunk the enemy Battleship";
       }
-      if (square.classList.contains("cruiser")) {
-        aiShipCount.cruiser--;
-        if (aiShipCount.cruiser == 0)
-          message = "Player sunk the enemy Cruiser!";
+      if (cellClassList.includes("cruiser")) {
+        if (--enemyShipHp.cruiser == 0) info = "and sunk the enemy Cruiser";
       }
-      if (square.classList.contains("submarine")) {
-        aiShipCount.submarine--;
-        if (aiShipCount.submarine == 0)
-          message = "Player sunk the enemy Submarine!";
+      if (cellClassList.includes("submarine")) {
+        if (--enemyShipHp.submarine == 0) info = "and sunk the enemy Submarine";
       }
-      if (square.classList.contains("destroyer")) {
-        aiShipCount.destroyer--;
-        if (aiShipCount.destroyer == 0)
-          message = "Player sunk the enemy Destroyer!";
+      if (cellClassList.includes("destroyer")) {
+        if (--enemyShipHp.destroyer == 0) info = "and sunk the enemy Destroyer";
       }
     }
 
-    // Set hit cells
-    if (square.classList.contains("filled")) {
-      square.classList.add("hit");
-      gameInfoDisplay.innerHTML = "Player scored a hit!" + " " + message;
+    console.log(enemyShipHp);
+
+    /* Set ship cell as hit or miss */
+    if (cellClassList.includes("filled")) {
+      enemyCell.classList.add("hit");
+      gameInfoDisplay.innerHTML = `You landed a hit ${info}`;
     } else {
-      square.classList.add("miss");
-      gameInfoDisplay.innerHTML = "Player missed!" + " " + message;
+      enemyCell.classList.add("miss");
+      gameInfoDisplay.innerHTML = "You missed";
     }
 
-    isUserTurn = false;
+    currentTurn = ENEMY;
     checkGameOver();
-    startAiGame();
+
+    if (gameMode == PLAY_AI) playAiGame();
   }
 
-  function aiTurn() {
-    let randomUserCell = Math.floor(Math.random() * 100);
-    let square = userSquares[randomUserCell];
-    let message = "";
+  function enemyTurn(cell) {
+    let info = "";
+    let cellClassList = playerCells[cell].classList;
 
-    while (
-      square.classList.contains("hit") ||
-      square.classList.contains("miss")
-    ) {
-      randomUserCell = Math.floor(Math.random() * 100);
-      square = userSquares[randomUserCell];
+    if (gameMode == PLAY_AI) {
+      do {
+        cellClassList = playerCells[Math.floor(Math.random() * 100)].classList;
+      } while (cellClassList.contains("hit") || cellClassList.contains("miss"));
     }
 
-    // Add number of hits for each ship type hit ONLY if not hit already
-    if (square.classList.contains("carrier")) {
-      userShipCount.carrier--;
-      if (userShipCount.carrier == 0)
-        message = "Enemy sunk the player's Carrier!";
-    }
-    if (square.classList.contains("battleship")) {
-      userShipCount.battleship--;
-      if (userShipCount.battleship == 0)
-        message = "Enemy sunk the player's Battleship!";
-    }
-    if (square.classList.contains("cruiser")) {
-      userShipCount.cruiser--;
-      if (userShipCount.cruiser == 0)
-        message = "Enemy sunk the player's Cruiser!";
-    }
-    if (square.classList.contains("submarine")) {
-      userShipCount.submarine--;
-      if (userShipCount.submarine == 0)
-        message = "Enemy sunk the player's Submarine!";
-    }
-    if (square.classList.contains("destroyer")) {
-      userShipCount.destroyer--;
-      if (userShipCount.destroyer == 0)
-        message = "Enemy sunk the player's Destroyer!";
+    /* Decrease ship HP only if ship cell hasn't been hit */
+    if (!cellClassList.contains("hit") && !isGameOver && currentTurn == ENEMY) {
+      if (cellClassList.contains("carrier")) {
+        if (--playerShipHp.carrier == 0) info = "and sunk your Carrier";
+      }
+      if (cellClassList.contains("battleship")) {
+        if (--playerShipHp.battleship == 0) info = "and sunk your Battleship";
+      }
+      if (cellClassList.contains("cruiser")) {
+        if (--playerShipHp.cruiser == 0) info = "and sunk your Cruiser";
+      }
+      if (cellClassList.contains("submarine")) {
+        if (--playerShipHp.submarine == 0) info = "and sunk your Submarine";
+      }
+      if (cellClassList.contains("destroyer")) {
+        if (--playerShipHp.destroyer == 0) info = "and sunk your Destroyer";
+      }
     }
 
-    // Set hit cells
-    if (square.classList.contains("filled")) {
-      square.classList.add("hit");
-      gameInfoDisplay.innerHTML = "Enemy scored a hit!" + " " + message;
+    console.log(playerShipHp);
+
+    /* Set ship cell as hit or miss */
+    if (cellClassList.contains("filled")) {
+      cellClassList.add("hit");
+      gameInfoDisplay.innerHTML = `Enemy landed a hit ${info}`;
     } else {
-      square.classList.add("miss");
-      gameInfoDisplay.innerHTML = "Enemy missed!" + " " + message;
+      cellClassList.add("miss");
+      gameInfoDisplay.innerHTML = "Enemy missed";
     }
 
-    isUserTurn = true;
+    currentTurn = PLAYER;
     checkGameOver();
-    startAiGame();
+
+    if (gameMode == PLAY_AI) playAiGame();
   }
 
   // Game logic
-  let isUserTurn = true;
   let isGameInit = true;
   let isGameOver = false;
 
-  function startAiGame() {
+  function playAiGame() {
     // Setup game
     if (isGameInit) {
       // Don't start game unless all ships placed
@@ -548,49 +558,32 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Add listener for each square ONLY ONCE
-      aiSquares.forEach((square) =>
-        square.addEventListener("click", function (e) {
-          revealSquare(square);
-        })
+      // Add listener for each cell ONLY ONCE
+      enemyCells.forEach((cell) =>
+        cell.addEventListener("click", () => revealEnemyCell(cell.classList))
       );
 
       // Remove ability to start new game by pressing the button
-      startGameButton.removeEventListener("click", startAiGame);
+      startGameButton.removeEventListener("click", playAiGame);
 
       isGameInit = false;
     }
 
     if (isGameOver) return;
 
-    if (isUserTurn) {
-      // USER TURN
-      currentTurnDisplay.innerHTML = "Player Turn";
+    if (currentTurn == PLAYER) {
+      // PLAYER TURN
+      currentTurnDisplay.innerHTML = "Your Turn";
     } else {
       // AI TURN
-      currentTurnDisplay.innerHTML = "Enemy Turn";
+      currentTurnDisplay.innerHTML = "Enemy AI Turn";
 
       // AI TAKES TURN
-      setTimeout(aiTurn, 1500);
+      setTimeout(enemyTurn, 1500);
     }
   }
 
-  function startOnlineGame(socket) {
-    // // Setup game ???
-    // if (isGameInit) {
-    //   // Add listener for each square ONLY ONCE
-    //   aiSquares.forEach((square) =>
-    //     square.addEventListener("click", function (e) {
-    //       revealSquare(square);
-    //     })
-    //   );
-
-    //   // Remove ability to start new game by pressing the button
-    //   startGameButton.removeEventListener("click", startAiGame);
-
-    //   isGameInit = false;
-    // }
-
+  function playOnlineGame(socket) {
     if (isGameOver) return;
 
     if (!playerReady) {
@@ -600,7 +593,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (enemyReady) {
-      if (currentTurn == PLAYER) currentTurnDisplay.innerHTML = "Player Turn";
+      if (currentTurn == PLAYER) currentTurnDisplay.innerHTML = "Your Turn";
       else currentTurnDisplay.innerHTML = "Enemy Turn";
     }
   }

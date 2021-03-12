@@ -70,4 +70,19 @@ io.on("connection", (socket) => {
 
     socket.emit("check-players", players);
   });
+
+  // On fire received
+  socket.on("fire", (id) => {
+    console.log(`Shot fired from ${playerIndex} on ${id}`);
+    // Emit the move to the other player
+    socket.broadcast.emit("fire", id);
+  });
+
+  // On fire-reply
+  socket.on("fire-reply", (cellClassList) => {
+    console.log(cellClassList);
+
+    // Forward reply to other player
+    socket.broadcast.emit("fire-reply", cellClassList);
+  });
 });
