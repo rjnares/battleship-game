@@ -1,3 +1,65 @@
+body {
+  margin: 0;
+  background-color: #f3f3f3;
+  overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+  font-family: "Montserrat", sans-serif;
+  box-sizing: border-box;
+}
+
+.splash-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 66vh;
+}
+
+.splash-title {
+  font-family: "Bangers", cursive;
+  font-size: 10rem;
+}
+
+.btn {
+  background-color: hsl(30, 100%, 50%);
+  padding: 0.5em 1em;
+  outline: none;
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: 0.2em;
+  color: #333;
+}
+
+.btn:hover,
+.btn:focus {
+  background-color: hsl(30, 100%, 40%);
+}
+
+.splash-btn {
+  font-size: 2rem;
+  margin-left: 2rem;
+}
+
+.splash-btn:first-child {
+  margin-left: 0;
+}
+
+.splash-battleship-image {
+  position: absolute;
+  bottom: 5vh;
+  left: 20vw;
+  width: 100%;
+  transform: rotateY(180deg);
+  pointer-events: none;
+  opacity: 0.25;
+  z-index: -1;
+}
+
 .container {
   display: flex;
 }

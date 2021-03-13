@@ -1,14 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  /* Game Mode Selection */
-  let gameMode = null;
-  const PLAY_AI = 0;
-  const PLAY_ONLINE = 1;
-  const playAiButton = document.querySelector("#play-ai");
-  const playOnlineButton = document.querySelector("#play-online");
-
-  playAiButton.addEventListener("click", playAi);
-  playOnlineButton.addEventListener("click", playOnline);
-
   /* Current Turn */
   const ENEMY = 0;
   const PLAYER = 1;
@@ -61,10 +51,47 @@ document.addEventListener("DOMContentLoaded", () => {
   createGameGrid(playerGrid, playerCells);
   createGameGrid(enemyGrid, enemyCells);
 
+  /* Ship Class Models */
+  const shipArray = [
+    {
+      name: "carrier",
+      directions: [
+        [0, 1, 2, 3, 4],
+        [0, CELL_SIDE, 2 * CELL_SIDE, 3 * CELL_SIDE, 4 * CELL_SIDE],
+      ],
+    },
+    {
+      name: "battleship",
+      directions: [
+        [0, 1, 2, 3],
+        [0, CELL_SIDE, 2 * CELL_SIDE, 3 * CELL_SIDE],
+      ],
+    },
+    {
+      name: "cruiser",
+      directions: [
+        [0, 1, 2],
+        [0, CELL_SIDE, 2 * CELL_SIDE],
+      ],
+    },
+    {
+      name: "submarine",
+      directions: [
+        [0, 1, 2],
+        [0, CELL_SIDE, 2 * CELL_SIDE],
+      ],
+    },
+    {
+      name: "destroyer",
+      directions: [
+        [0, 1],
+        [0, CELL_SIDE],
+      ],
+    },
+  ];
+
   /* Play AI Code */
   function playAi() {
-    gameMode = PLAY_AI;
-
     /* Generate random enemy AI ship placement */
     shipArray.forEach((ship) => generateRandomShipLayout(ship));
 
@@ -74,8 +101,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* Play Online Code */
   function playOnline() {
-    gameMode = PLAY_ONLINE;
-
     const socket = io();
 
     // Get player number
@@ -174,44 +199,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Ships
-  const shipArray = [
-    {
-      name: "carrier",
-      directions: [
-        [0, 1, 2, 3, 4],
-        [0, CELL_SIDE, 2 * CELL_SIDE, 3 * CELL_SIDE, 4 * CELL_SIDE],
-      ],
-    },
-    {
-      name: "battleship",
-      directions: [
-        [0, 1, 2, 3],
-        [0, CELL_SIDE, 2 * CELL_SIDE, 3 * CELL_SIDE],
-      ],
-    },
-    {
-      name: "cruiser",
-      directions: [
-        [0, 1, 2],
-        [0, CELL_SIDE, 2 * CELL_SIDE],
-      ],
-    },
-    {
-      name: "submarine",
-      directions: [
-        [0, 1, 2],
-        [0, CELL_SIDE, 2 * CELL_SIDE],
-      ],
-    },
-    {
-      name: "destroyer",
-      directions: [
-        [0, 1],
-        [0, CELL_SIDE],
-      ],
-    },
-  ];
+  /* Game Mode Selection */
+  if (gameMode == PLAY_AI) playAi();
+  else playOnline();
 
   function isValidStart(start, shipLength, direction) {
     if (direction) {

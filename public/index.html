@@ -4,76 +4,20 @@
 <head>
   <meta charset="utf-8" dir="ltr">
   <title>Play Battleship</title>
-  <meta name="description" content="My online, multiplayer version of the classic Battleship game">
-  <meta name="keywords" content="Battleship, Game">
-  <meta name="author" content="rjnares">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
-  <script src="app.js" charset="utf-8" defer></script>
-  <script src="/socket.io/socket.io.js"></script>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Montserrat&display=swap" rel="stylesheet">
 </head>
 
 <body>
-
-    <button id="play-ai">Play AI</button>
-    <button id="play-online">Play Online</button>
-
-    <div class="player p1">
-        Player 1
-        <div class="connected">Connected <span></span></div>
-        <div class="ready">Ready <span></span></div>
+    <div class="splash-container">
+        <h1 class="splash-title">Battleship</h1>
+        <div>
+            <a class="btn splash-btn" href="/play-ai.html">Play AI</a>
+            <a class="btn splash-btn" href="/play-online.html">Play Online</a>
+        </div>
     </div>
-
-    <div class="player p2">
-        Player 2
-        <div class="connected">Connected <span></span></div>
-        <div class="ready">Ready <span></span></div>
-    </div>
-
-<div class="container">
-    <div class="grid grid-player"></div>
-    <div class="grid grid-enemy"></div>
-</div>
-
-<div class="hidden-info">
-<button id="start-game">Start Game</button>
-<button id="rotate-ships">Rotate Ships</button>
-<h3 id="current-turn"></h3>
-<h3 id="game-info"></h3>
-</div>
-
-<div class="grid-choose-ships">
-    <div class="ship carrier-container" draggable="true">
-        <div id="carrier-0"></div>
-        <div id="carrier-1"></div>
-        <div id="carrier-2"></div>
-        <div id="carrier-3"></div>
-        <div id="carrier-4"></div>
-    </div>
-
-    <div class="ship battleship-container" draggable="true">
-        <div id="battleship-0"></div>
-        <div id="battleship-1"></div>
-        <div id="battleship-2"></div>
-        <div id="battleship-3"></div>
-    </div>
-
-    <div class="ship cruiser-container" draggable="true">
-        <div id="cruiser-0"></div>
-        <div id="cruiser-1"></div>
-        <div id="cruiser-2"></div>
-    </div>
-
-    <div class="ship submarine-container" draggable="true">
-        <div id="submarine-0"></div>
-        <div id="submarine-1"></div>
-        <div id="submarine-2"></div>
-    </div>
-
-    <div class="ship destroyer-container" draggable="true">
-        <div id="destroyer-0"></div>
-        <div id="destroyer-1"></div>
-    </div>
-</div>
+    <img src="/images/battleship.svg" class="splash-battleship-image"/>
 </body>
 </html>
