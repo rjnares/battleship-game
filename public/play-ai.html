@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" dir="ltr">
+  <title>Play AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Montserrat&display=swap" rel="stylesheet">
+  <script>
+        const PLAY_AI = 0;
+        let gameMode = PLAY_AI;
+  </script>
+  <script src="app.js" charset="utf-8" defer></script>
+</head>
+
+<body>
+<div class="container">
+    <div class="grid grid-player"></div>
+    <div class="grid grid-enemy"></div>
+</div>
+
+<div class="hidden-info">
+<button id="start-game">Start Game</button>
+<button id="rotate-ships">Rotate Ships</button>
+<h3 id="current-turn"></h3>
+<h3 id="game-info"></h3>
+</div>
+
+<div class="grid-choose-ships">
+    <div class="ship carrier-container" draggable="true">
+        <div id="carrier-0"></div>
+        <div id="carrier-1"></div>
+        <div id="carrier-2"></div>
+        <div id="carrier-3"></div>
+        <div id="carrier-4"></div>
+    </div>
+
+    <div class="ship battleship-container" draggable="true">
+        <div id="battleship-0"></div>
+        <div id="battleship-1"></div>
+        <div id="battleship-2"></div>
+        <div id="battleship-3"></div>
+    </div>
+
+    <div class="ship cruiser-container" draggable="true">
+        <div id="cruiser-0"></div>
+        <div id="cruiser-1"></div>
+        <div id="cruiser-2"></div>
+    </div>
+
+    <div class="ship submarine-container" draggable="true">
+        <div id="submarine-0"></div>
+        <div id="submarine-1"></div>
+        <div id="submarine-2"></div>
+    </div>
+
+    <div class="ship destroyer-container" draggable="true">
+        <div id="destroyer-0"></div>
+        <div id="destroyer-1"></div>
+    </div>
+</div>
+</body>
+</html>
