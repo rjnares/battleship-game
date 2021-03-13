@@ -126,13 +126,39 @@ body {
 }
 
 .filled.horizontal::before {
+  animation: ripplesY 3s linear infinite;
   border-left: none;
   border-right: none;
 }
 
 .filled.vertical::before {
+  animation: ripplesX 3s linear infinite;
   border-top: none;
   border-bottom: none;
+}
+
+@keyframes ripplesX {
+  0% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scaleX(1.5);
+  }
+}
+
+@keyframes ripplesY {
+  0% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scaleY(1.5);
+  }
 }
 
 .grid-choose-ships {
