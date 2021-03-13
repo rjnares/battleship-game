@@ -231,6 +231,13 @@ body {
   margin: 1rem;
 }
 
+.hit,
+.miss {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .hit::after,
 .miss::after {
   content: "";
@@ -246,6 +253,38 @@ body {
 
 .miss::after {
   background-color: white;
+}
+
+.hit::before,
+.miss::before {
+  content: "";
+  position: absolute;
+  animation: fire 0.2s ease-out forwards;
+  border-width: 1vmin;
+  border-style: solid;
+  border-radius: 100%;
+  width: 2vmin;
+  height: 2vmin;
+}
+
+.hit::before {
+  border-color: red;
+}
+
+.miss::before {
+  border-color: white;
+}
+
+@keyframes fire {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(4);
+  }
 }
 
 .connected,
