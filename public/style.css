@@ -75,6 +75,11 @@ body {
   grid-template-columns: repeat(10, 4.6vmin);
 }
 
+.grid-enemy > .filled {
+  background-color: hsl(200, 100%, 50%) !important;
+  border-radius: 0 !important;
+}
+
 .battleship-grid div {
   border: 1px solid hsla(0, 0%, 100%, 0.2);
 }
@@ -82,6 +87,26 @@ body {
 .filled,
 .ship {
   background-color: hsl(0, 0%, 80%);
+}
+
+.filled.vertical.start {
+  border-top-left-radius: 50%;
+  border-top-right-radius: 50%;
+}
+
+.filled.vertical.end {
+  border-bottom-left-radius: 50%;
+  border-bottom-right-radius: 50%;
+}
+
+.filled.horizontal.start {
+  border-top-left-radius: 50%;
+  border-bottom-left-radius: 50%;
+}
+
+.filled.horizontal.end {
+  border-top-right-radius: 50%;
+  border-bottom-right-radius: 50%;
 }
 
 .grid-choose-ships {

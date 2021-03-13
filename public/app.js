@@ -297,7 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   playerCells.forEach((cell) => cell.addEventListener("dragleave", dragLeave));
 
-  playerCells.forEach((cell) => cell.addEventListener("drop", drop));
+  playerCells.forEach((cell) => cell.addEventListener("drop", dragDrop));
 
   function dragStart() {
     draggedShip = this;
@@ -317,89 +317,97 @@ document.addEventListener("DOMContentLoaded", () => {
   function dragLeave() {}
 
   function canPlace(dropCellId, selectedShipIndex) {
-    let pass = true;
-
-    if (orientation == HORIZONTAL) {
-      for (let i = 0; i < draggedShipLength; i++) {
-        const cellPlaceId = dropCellId - selectedShipIndex + i;
-        const filled = playerCells[cellPlaceId].classList.contains("filled");
-        if (filled) pass = false;
-      }
-    } else {
-      for (let i = 0; i < draggedShipLength; i++) {
-        const cellPlaceId =
-          dropCellId - selectedShipIndex * CELL_SIDE + i * CELL_SIDE;
-        const filled = playerCells[cellPlaceId].classList.contains("filled");
-        if (filled) pass = false;
-      }
+    for (let i = 0; i < draggedShipLength; i++) {
+      const cellPlaceId =
+        orientation == HORIZONTAL
+          ? dropCellId - selectedShipIndex + i
+          : dropCellId - selectedShipIndex * CELL_SIDE + i * CELL_SIDE;
+      const filled = playerCells[cellPlaceId].classList.contains("filled");
+      if (filled) return false;
     }
-    return pass;
+
+    return true;
   }
 
-  function drop() {
+  function dragDrop() {
     const dropCellId = parseInt(this.dataset.id);
-    const shipClass = selectedShipNameWithIndex.slice(0, -2);
     const selectedShipIndex = parseInt(selectedShipNameWithIndex.substr(-1));
 
+    if (!canPlace(dropCellId, selectedShipIndex)) return;
+
+    const shipClass = selectedShipNameWithIndex.slice(0, -2);
+    const lastShipIndex = parseInt(draggedShip.lastElementChild.id.substr(-1));
+
     if (orientation == HORIZONTAL) {
-      // HORIZONTAL
+      /* Use drop cell id to find row min/max cell ids */
+      const rowMinCellId = dropCellId - (dropCellId % CELL_SIDE);
+      const rowMaxCellId = rowMinCellId + CELL_SIDE - 1;
 
-      // Use drop cell id to find min/max
-      const minLimit = dropCellId - (dropCellId % CELL_SIDE);
-      const maxLimit = minLimit + CELL_SIDE - 1;
+      /* Use drop cell id and selected ship index to find start/end cell ids */
+      const startCellId = dropCellId - selectedShipIndex;
+      const endCellId = dropCellId + (lastShipIndex - selectedShipIndex);
 
-      // Use drop cell id and selected ship index to find low/high
-      const lastShipIndex = parseInt(
-        draggedShip.lastElementChild.id.substr(-1)
-      );
-      const low = dropCellId - selectedShipIndex;
-      const high = dropCellId + (lastShipIndex - selectedShipIndex);
-
-      // If min <= low < high <= max then allow placement, otherwise deny placement
+      /* If rowMinCellId <= startCellId < endCellId <= rowMaxCellId, then allow placement */
       if (
-        minLimit <= low &&
-        low < high &&
-        high <= maxLimit &&
-        canPlace(dropCellId, selectedShipIndex)
+        rowMinCellId <= startCellId &&
+        startCellId < endCellId &&
+        endCellId <= rowMaxCellId
       ) {
-        // Place ship
+        /* Place Ship */
         for (let i = 0; i < draggedShipLength; i++) {
           const cellPlaceId = dropCellId - selectedShipIndex + i;
-          playerCells[cellPlaceId].classList.add("filled", shipClass);
+          let startOrEndClass = "";
+
+          if (i == 0) startOrEndClass = "start";
+          if (i == draggedShipLength - 1) startOrEndClass = "end";
+
+          /* Set each placed cell as filled and horizontal */
+          playerCells[cellPlaceId].classList.add(
+            "filled",
+            "horizontal",
+            shipClass
+          );
+
+          if (startOrEndClass)
+            playerCells[cellPlaceId].classList.add(startOrEndClass);
         }
 
-        // Remove ship from choose ship grid to avoid placing more than one of same ship
+        /* Remove ship class from choose ships grid to prevent placing more than one */
         chooseShipsGrid.removeChild(draggedShip);
       }
     } else {
-      // VERTICAL
+      /* Use drop cell id and selected ship index to find start/end cell ids */
+      const startCellId = dropCellId - selectedShipIndex * CELL_SIDE;
+      const endCellId =
+        dropCellId + (lastShipIndex - selectedShipIndex) * CELL_SIDE;
 
-      // Use drop cell id and selected ship index to find low/high
-      const lastShipIndex = parseInt(
-        draggedShip.lastElementChild.id.substr(-1)
-      );
-      const low = dropCellId - selectedShipIndex * CELL_SIDE;
-      const high = dropCellId + (lastShipIndex - selectedShipIndex) * CELL_SIDE;
-
-      // If 0 <= low < high <= 99 then allow placement, otherwise deny placement
-      if (
-        0 <= low &&
-        low < high &&
-        high <= 99 &&
-        canPlace(dropCellId, selectedShipIndex)
-      ) {
-        // Place ship
+      /* If 0 <= startCellId < endCellId <= 99, then allow placement */
+      if (0 <= startCellId && startCellId < endCellId && endCellId <= 99) {
+        /* Place Ship */
         for (let i = 0; i < draggedShipLength; i++) {
           const cellPlaceId =
             dropCellId - selectedShipIndex * CELL_SIDE + i * CELL_SIDE;
-          playerCells[cellPlaceId].classList.add("filled", shipClass);
+          let startOrEndClass = "";
+
+          if (i == 0) startOrEndClass = "start";
+          if (i == draggedShipLength - 1) startOrEndClass = "end";
+
+          /* Set each placed cell as filled and vertical */
+          playerCells[cellPlaceId].classList.add(
+            "filled",
+            "vertical",
+            shipClass
+          );
+
+          if (startOrEndClass)
+            playerCells[cellPlaceId].classList.add(startOrEndClass);
         }
 
-        // Remove ship from choose ship grid to avoid placing more than one of same ship
+        /* Remove ship class from choose ships grid to prevent placing more than one */
         chooseShipsGrid.removeChild(draggedShip);
       }
     }
-    // Check if player has placed all ships
+    /* Check if player has placed all ships */
     if (!chooseShipsGrid.querySelector(".ship")) allShipsPlaced = true;
   }
 
