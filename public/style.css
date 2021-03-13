@@ -86,27 +86,53 @@ body {
 
 .filled,
 .ship {
+  position: relative;
   background-color: hsl(0, 0%, 80%);
 }
 
-.filled.vertical.start {
+.filled.vertical.start,
+.filled.vertical.start::before {
   border-top-left-radius: 50%;
   border-top-right-radius: 50%;
 }
 
-.filled.vertical.end {
+.filled.vertical.end,
+.filled.vertical.end::before {
   border-bottom-left-radius: 50%;
   border-bottom-right-radius: 50%;
 }
 
-.filled.horizontal.start {
+.filled.horizontal.start,
+.filled.horizontal.start::before {
   border-top-left-radius: 50%;
   border-bottom-left-radius: 50%;
 }
 
-.filled.horizontal.end {
+.filled.horizontal.end,
+.filled.horizontal.end::before {
   border-top-right-radius: 50%;
   border-bottom-right-radius: 50%;
+}
+
+.filled.vertical::before,
+.filled.horizontal::before {
+  content: "";
+  position: absolute;
+  border: 0.3vmin solid white;
+  top: -1px;
+  bottom: -1px;
+  left: -1px;
+  right: -1px;
+}
+
+.filled.horizontal::before {
+  border-left: none;
+  border-right: none;
+}
+
+.filled.vertical::before {
+  border-top: none;
+  border-bottom: none;
 }
 
 .grid-choose-ships {
