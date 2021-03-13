@@ -498,7 +498,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function enemyTurn(cell) {
     let info = "";
     let cellClassList =
-      gameMode == PLAY_ONLINE ? playerCells[cell].classList : null;
+      gameMode == PLAY_AI ? null : playerCells[cell].classList;
 
     if (gameMode == PLAY_AI) {
       do {
