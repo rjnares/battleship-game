@@ -25,6 +25,7 @@ body {
 }
 
 .btn {
+  font-size: inherit;
   background-color: hsl(30, 100%, 50%);
   padding: 0.5em 1em;
   outline: none;
@@ -141,6 +142,16 @@ body {
 .carrier-container-vertical {
   --width: 1;
   --height: 5;
+}
+
+.hidden-info {
+  font-size: 1.5rem;
+  align-items: center;
+  flex-direction: column;
+}
+
+.info-text {
+  margin: 1rem;
 }
 
 .hit {
