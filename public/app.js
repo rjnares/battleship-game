@@ -1,4 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
+  /* Game Mode */
+  const PLAY_AI = 0;
+  const PLAY_ONLINE = 1;
+
   /* Current Turn */
   const ENEMY = 0;
   const PLAYER = 1;
@@ -134,9 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const number = parseInt(num);
       let player = `.p${number + 1}`;
 
-      document
-        .querySelector(`${player} .connected span`)
-        .classList.toggle("green");
+      document.querySelector(`${player} .connected`).classList.toggle("active");
 
       if (number == playerNum) {
         document.querySelector(player).style.fontWeight = "bold";
@@ -623,7 +625,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function setReady(num) {
     const number = parseInt(num);
     let player = `.p${number + 1}`;
-
-    document.querySelector(`${player} .ready span`).classList.toggle("green");
+    document.querySelector(`${player} .ready`).classList.toggle("active");
   }
 });
