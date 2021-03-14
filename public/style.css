@@ -75,7 +75,8 @@ body {
   grid-template-columns: repeat(10, 4.6vmin);
 }
 
-.grid-enemy > .filled {
+.grid-enemy > .filled,
+.grid-enemy > .hit {
   background-color: hsl(200, 100%, 50%) !important;
   border-radius: 0 !important;
 }
@@ -291,19 +292,18 @@ body {
   }
 }
 
+.player {
+  margin: 2vmin;
+}
 .connected,
 .ready {
   font-weight: normal;
+  opacity: 0.25;
+  text-decoration: line-through;
 }
 
-.connected span,
-.ready span {
-  display: inline-block;
-  width: 1rem;
-  height: 1rem;
-  background-color: red;
-}
-
-span.green {
-  background-color: green;
+.connected.active,
+.ready.active {
+  opacity: 1;
+  text-decoration: none;
 }
