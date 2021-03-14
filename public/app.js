@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const destroyer = document.querySelector(".destroyer-container");
 
   /* Game Functions */
+  const setupButtons = document.querySelector(".setup-buttons");
   const startGameButton = document.querySelector("#start-game");
   const rotateShipsButton = document.querySelector("#rotate-ships");
   const currentTurnDisplay = document.querySelector("#current-turn");
@@ -191,11 +192,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     startGameButton.addEventListener("click", () => {
-      if (allShipsPlaced) {
-        /* Clear previous messages when starting game */
-        gameInfoDisplay.innerHTML = "";
-        playOnlineGame(socket);
-      } else gameInfoDisplay.innerHTML = "All ships must be placed";
+      if (allShipsPlaced) playOnlineGame(socket);
+      else gameInfoDisplay.innerHTML = "All ships must be placed";
     });
   }
 
@@ -540,7 +538,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (gameMode == PLAY_AI) playAiGame();
   }
 
-  // Game logic
+  /* Game Logic */
   let isGameInit = true;
   let isGameOver = false;
 
@@ -564,9 +562,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
-      /* Prevent game start button click during current game */
+      /* Prevent game start and rotate ship buttons from being clicked during current game */
       /* TODO: Pressing button should reset game with new enemy AI ship placements */
       startGameButton.removeEventListener("click", playAiGame);
+      setupButtons.style.display = "none";
 
       /* Player goes first by default in 'Play AI' mode */
       currentTurn = PLAYER;
@@ -604,6 +603,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (enemyReady) {
+      if (isGameInit) {
+        /* Prevent game start and rotate ship buttons from being clicked during current game */
+        /* TODO: Pressing button should reset game with new enemy AI ship placements */
+        startGameButton.removeEventListener("click", playAiGame);
+        setupButtons.style.display = "none";
+
+        /* Clear previous messages when starting game */
+        gameInfoDisplay.innerHTML = "";
+
+        isGameInit = false;
+      }
+
       if (currentTurn == PLAYER) currentTurnDisplay.innerHTML = "Your Turn";
       else currentTurnDisplay.innerHTML = "Enemy Turn";
     }
